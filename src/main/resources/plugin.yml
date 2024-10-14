@@ -1,0 +1,18 @@
+name: BetterMultiplayerSleep
+version: '1.0'
+main: com.bennyboy12306.betterMultiplayerSleep.BetterMultiplayerSleep
+api-version: '1.21'
+authors:
+  - Bennyboy12306
+description: A plugin that improves multiplayer sleep functionality
+
+commands:
+  no-sleep:
+    description: Toggles between the plugin default amount and 100% of players having to sleep to skip the night
+    usage: /no-sleep
+    permission: better-multiplayer-sleep.base
+
+permissions:
+  better-multiplayer-sleep.base:
+    description: Allows players to toggle between the plugin default amount and 100% of players having to sleep to skip the night
+    default: true
