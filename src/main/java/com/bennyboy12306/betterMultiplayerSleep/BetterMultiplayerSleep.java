@@ -3,7 +3,6 @@ package com.bennyboy12306.betterMultiplayerSleep;
 import commands.NoSleepCommand;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
-import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -36,22 +35,7 @@ public final class BetterMultiplayerSleep extends JavaPlugin
         // Register the commands
         getCommand("no-sleep").setExecutor(new NoSleepCommand(this));
 
-        // Get the time then initialize and start the day time task when the plugin is enabled
-        // Get the overworld
-        World world = Bukkit.getWorlds().stream()
-                .filter(w -> w.getEnvironment() == World.Environment.NORMAL)
-                .findFirst()
-                .orElse(null);
-
-        // If no overworld is found, return (to avoid null issues)
-        if (world == null) return;
-
-        long time = world.getTime();
-
-        /**
-         * @Todo Fix this. Reset does not happen automatically
-         */
-        new NewDayTask(this, time).runTaskTimer(this, 0L, 200L); // Check every 200 ticks (10 seconds)
+        new NewDayTask(this).runTaskTimer(this, 0L, 200L); // Check every 200 ticks (10 seconds)
 
         //Log plugin start up
         getLogger().info("The Better Multiplayer Sleep Plugin has been enabled");

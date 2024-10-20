@@ -1,6 +1,7 @@
 package com.bennyboy12306.betterMultiplayerSleep;
 
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -12,15 +13,13 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class NewDayTask extends BukkitRunnable
 {
     private final BetterMultiplayerSleep plugin;
-    private long time;
 
     /**
      * Constructor.
      * @param plugin a reference to the main plugin class.
      */
-    public NewDayTask(BetterMultiplayerSleep plugin, long time) {
+    public NewDayTask(BetterMultiplayerSleep plugin) {
         this.plugin = plugin;
-        this.time = time;
     }
 
     /**
@@ -29,7 +28,19 @@ public class NewDayTask extends BukkitRunnable
     @Override
     public void run()
     {
-        // If it is morning and no-sleep was set (from the previous night) reset it
+        // Get the time
+        // Get the overworld
+        World world = Bukkit.getWorlds().stream()
+                .filter(w -> w.getEnvironment() == World.Environment.NORMAL)
+                .findFirst()
+                .orElse(null);
+
+        // If no overworld is found, return (to avoid null issues)
+        if (world == null) return;
+
+        long time = world.getTime();
+
+        // If it is morning (between 6am and 7am) and no-sleep was set (from the previous night) reset it
         if (time >= 0 && time <= 1000 && plugin.getNoSleep()) {
             plugin.setNoSleep(false);
             plugin.setControlPlayerName(null);
