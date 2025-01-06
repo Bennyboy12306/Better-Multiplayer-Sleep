@@ -1,5 +1,10 @@
+/Paper/dependency-reduced-pom.xml
+/Paper/welcomeMessage.iml
+/Paper/target
+/Paper/.idea
 
-/.idea
-/target
-dependency-reduced-pom.xml
-welcomeMessage.iml
+/Fabric/.idea
+/Fabric/build
+/Fabric/.gradle
+/Fabric/run
+
