@@ -51,7 +51,11 @@ public class NewDayTask extends BukkitRunnable
             String cmd = "gamerule playersSleepingPercentage " + sleepPercent;
             Bukkit.dispatchCommand(cmdSender, cmd);
 
-            Bukkit.broadcastMessage("§1No-Sleep Reset: Players sleeping percent is now: " + sleepPercent + "%");
+            // Load in color from config file
+            String color = config.getString("message-color");
+            color = color.replace("&", "§");
+
+            Bukkit.broadcastMessage(color + "No-Sleep Reset: Players sleeping percent is now: " + sleepPercent + "%");
         }
     }
 }

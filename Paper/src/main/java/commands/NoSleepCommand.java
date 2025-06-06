@@ -35,6 +35,10 @@ public class NoSleepCommand implements CommandExecutor
     {
         if (sender.hasPermission("better-multiplayer-sleep.base"))
         {
+            // Load in color from config file
+            FileConfiguration config = plugin.getConfig();
+            String color = config.getString("message-color");
+            color = color.replace("&", "§");
             if (!plugin.getNoSleep())
             {
                 //Prevent Skipping this night by disabling multiplayer sleep
@@ -45,7 +49,7 @@ public class NoSleepCommand implements CommandExecutor
                 String cmd = "gamerule playersSleepingPercentage 100";
                 Bukkit.dispatchCommand(cmdSender, cmd);
 
-                Bukkit.broadcastMessage("§1No-Sleep Requested: All players must sleep to skip to day");
+                Bukkit.broadcastMessage(color + "No-Sleep Requested: All players must sleep to skip to day");
                 sender.sendMessage("Use the command again to reset to default sleep percent");
             }
             else //Reset sleep functionality
@@ -53,13 +57,12 @@ public class NoSleepCommand implements CommandExecutor
                 //If player requested no sleep they are the only one who can reset it
                 if (sender.getName().equals(plugin.getControlPlayerName()))
                 {
-                    FileConfiguration config = plugin.getConfig();
                     String sleepPercent = config.getString("default-sleep-percent");
                     CommandSender cmdSender = Bukkit.getConsoleSender();
                     String cmd = "gamerule playersSleepingPercentage " + sleepPercent;
                     Bukkit.dispatchCommand(cmdSender, cmd);
 
-                    Bukkit.broadcastMessage("§1No-Sleep Reset: Players sleeping percent is now: " + sleepPercent + "%");
+                    Bukkit.broadcastMessage(color + "No-Sleep Reset: Players sleeping percent is now: " + sleepPercent + "%");
                     plugin.setNoSleep(false);
                     plugin.setControlPlayerName(null);
                 }

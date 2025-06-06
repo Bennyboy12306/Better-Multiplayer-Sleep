@@ -14,7 +14,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.World;
 
 import java.nio.file.Path;
 import java.nio.file.Files;
@@ -29,6 +28,7 @@ import java.util.Objects;
 
 public class BetterMultiplayerSleep implements ModInitializer {
     private int defaultSleepPercent = 0;
+    private String color = "§6";
     private boolean noSleep = false;
     private String controlPlayerName = null;
 
@@ -65,7 +65,7 @@ public class BetterMultiplayerSleep implements ModInitializer {
                         noSleep = true;
                         controlPlayerName = Objects.requireNonNull(context.getSource().getPlayer()).getName().getString();
                         setPlayerSleepingPercentage(world, 100);
-                        source.getServer().getPlayerManager().broadcast(Text.literal("§1No-Sleep Requested: All players must sleep to skip to day"), false);
+                        source.getServer().getPlayerManager().broadcast(Text.literal(color + "No-Sleep Requested: All players must sleep to skip to day"), false);
                         source.sendFeedback(() -> Text.literal("Use the command again to reset to default sleep percent"), false);
                     } else {
                         // Reset sleep functionality
@@ -87,15 +87,13 @@ public class BetterMultiplayerSleep implements ModInitializer {
      * @param server The Minecraft server instance.
      */
     private void onServerTick(MinecraftServer server) {
-        for (ServerWorld world : server.getWorlds()) {
-            if (world.getRegistryKey() == World.OVERWORLD) {
-                long time = world.getTimeOfDay();  // Get the current world time
+        ServerWorld overworld = server.getOverworld();
+        if (server.getOverworld() == null) return;
 
-                // If it is morning (between 6am and 7am) and no-sleep was set (from the previous night) reset it
-                if (time >= 0 && time <= 1000 && noSleep) {
-                    resetSleepSettings(world, server.getCommandSource());
-                }
-            }
+        long timeOfDay = overworld.getTimeOfDay() % 24000;
+
+        if (timeOfDay > 0 && timeOfDay < 100 && noSleep) {
+            resetSleepSettings(overworld, server.getCommandSource());
         }
     }
 
@@ -110,7 +108,7 @@ public class BetterMultiplayerSleep implements ModInitializer {
         // Reset the no sleep flag and control player name
         noSleep = false;
         controlPlayerName = null;
-        source.getServer().getPlayerManager().broadcast(Text.literal("§1No-Sleep Reset: Players sleeping percent is now: " + defaultSleepPercent + "%"), false);
+        source.getServer().getPlayerManager().broadcast(Text.literal("§6No-Sleep Reset: Players sleeping percent is now: " + defaultSleepPercent + "%"), false);
     }
 
     /**
@@ -141,32 +139,37 @@ public class BetterMultiplayerSleep implements ModInitializer {
                 JsonObject config = gson.fromJson(jsonContent, JsonObject.class);
 
                 // Check if the config is valid
-                if (config != null && config.has("defaultSleepPercent")) {
+                if (config != null && config.has("defaultSleepPercent") && config.has("messageColor")) {
                     defaultSleepPercent = config.get("defaultSleepPercent").getAsInt();
+                    color = config.get("messageColor").getAsString().replace("&", "§");
                 } else {
-                    System.out.println("Invalid config.json or missing 'defaultSleepPercent' field.");
+                    createDefaultConfig(configFilePath);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (com.google.gson.JsonSyntaxException e) {
-                System.out.println("Error parsing the config file. It might be malformed.");
-                e.printStackTrace();
+                createDefaultConfig(configFilePath);
             }
         } else {
-            // If the config file doesn't exist, create it with default data
-            System.out.println("Config file not found. Creating default config.");
+            createDefaultConfig(configFilePath);
+        }
+    }
 
-            // Create a new JsonObject with default data
-            JsonObject defaultConfig = new JsonObject();
-            defaultConfig.addProperty("defaultSleepPercent", 0);
+    private void createDefaultConfig(Path configFilePath) {
+        // If the config file doesn't exist, create it with default data
+        System.out.println("Config file not found or invalid. Creating default config.");
 
-            // Create the necessary directories and the config file
-            try {
-                Files.createDirectories(configFilePath.getParent()); // Ensure the parent directories exist
-                Files.writeString(configFilePath, defaultConfig.toString()); // Write the default data
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        // Create a new JsonObject with default data
+        JsonObject defaultConfig = new JsonObject();
+        defaultConfig.addProperty("defaultSleepPercent", 0);
+        defaultConfig.addProperty("messageColor", "&6");
+
+        // Create the necessary directories and the config file
+        try {
+            Files.createDirectories(configFilePath.getParent()); // Ensure the parent directories exist
+            Files.writeString(configFilePath, defaultConfig.toString()); // Write the default data
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
