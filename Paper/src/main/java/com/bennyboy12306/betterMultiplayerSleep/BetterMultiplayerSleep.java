@@ -6,6 +6,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Objects;
+
 /**
  * This class is the main entry point for the plugin.
  * @author Bennyboy12306
@@ -33,7 +35,7 @@ public final class BetterMultiplayerSleep extends JavaPlugin
         saveDefaultConfig();
 
         // Register the commands
-        getCommand("no-sleep").setExecutor(new NoSleepCommand(this));
+        Objects.requireNonNull(getCommand("no-sleep")).setExecutor(new NoSleepCommand(this));
 
         new NewDayTask(this).runTaskTimer(this, 0L, 200L); // Check every 200 ticks (10 seconds)
 

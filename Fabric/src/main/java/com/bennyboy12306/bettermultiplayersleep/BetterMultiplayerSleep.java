@@ -31,6 +31,7 @@ public class BetterMultiplayerSleep implements ModInitializer {
     private String color = "§6";
     private boolean noSleep = false;
     private String controlPlayerName = null;
+    private long lastDay = -1;
 
     /**
      * This method is called when the mod is initialized.
@@ -79,21 +80,21 @@ public class BetterMultiplayerSleep implements ModInitializer {
                 }));
     }
 
-    // Todo fix this, does not reset the day as intended
-    // Todo sometimes no-sleep does not work, It gets called as the message appears but the sleep percentage does not change, as seen by the fact that only one player needs to sleep to skip the night
-
     /**
      * This method checks if a new day has started and resets the sleep settings if so.
      * @param server The Minecraft server instance.
      */
     private void onServerTick(MinecraftServer server) {
         ServerWorld overworld = server.getOverworld();
-        if (server.getOverworld() == null) return;
+        if (overworld == null) return;
 
-        long timeOfDay = overworld.getTimeOfDay() % 24000;
+        long currentDay = overworld.getTimeOfDay() / 24000;
 
-        if (timeOfDay > 0 && timeOfDay < 100 && noSleep) {
-            resetSleepSettings(overworld, server.getCommandSource());
+        if (currentDay != lastDay) {
+            lastDay = currentDay;
+            if (noSleep) {
+                resetSleepSettings(overworld, server.getCommandSource());
+            }
         }
     }
 

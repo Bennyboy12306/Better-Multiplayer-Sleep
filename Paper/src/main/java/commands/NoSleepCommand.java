@@ -1,6 +1,7 @@
 package commands;
 
 import com.bennyboy12306.betterMultiplayerSleep.BetterMultiplayerSleep;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -49,7 +50,7 @@ public class NoSleepCommand implements CommandExecutor
                 String cmd = "gamerule playersSleepingPercentage 100";
                 Bukkit.dispatchCommand(cmdSender, cmd);
 
-                Bukkit.broadcastMessage(color + "No-Sleep Requested: All players must sleep to skip to day");
+                Bukkit.broadcast(Component.text(color + "No-Sleep Requested: All players must sleep to skip to day"));
                 sender.sendMessage("Use the command again to reset to default sleep percent");
             }
             else //Reset sleep functionality
@@ -62,7 +63,7 @@ public class NoSleepCommand implements CommandExecutor
                     String cmd = "gamerule playersSleepingPercentage " + sleepPercent;
                     Bukkit.dispatchCommand(cmdSender, cmd);
 
-                    Bukkit.broadcastMessage(color + "No-Sleep Reset: Players sleeping percent is now: " + sleepPercent + "%");
+                    Bukkit.broadcast(Component.text(color + "No-Sleep Reset: Players sleeping percent is now: " + sleepPercent + "%"));
                     plugin.setNoSleep(false);
                     plugin.setControlPlayerName(null);
                 }

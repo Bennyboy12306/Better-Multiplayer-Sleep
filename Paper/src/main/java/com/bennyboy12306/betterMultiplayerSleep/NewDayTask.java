@@ -1,5 +1,6 @@
 package com.bennyboy12306.betterMultiplayerSleep;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -53,9 +54,9 @@ public class NewDayTask extends BukkitRunnable
 
             // Load in color from config file
             String color = config.getString("message-color");
+            assert color != null;
             color = color.replace("&", "§");
-
-            Bukkit.broadcastMessage(color + "No-Sleep Reset: Players sleeping percent is now: " + sleepPercent + "%");
+            Bukkit.broadcast(Component.text(color + "No-Sleep Reset: Players sleeping percent is now: " + sleepPercent + "%"));
         }
     }
 }
