@@ -13,7 +13,7 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
-import net.minecraft.world.GameRules;
+import net.minecraft.world.rule.GameRules;
 
 import java.nio.file.Path;
 import java.nio.file.Files;
@@ -121,7 +121,7 @@ public class BetterMultiplayerSleep implements ModInitializer {
         percentage = Math.max(0, Math.min(100, percentage));
 
         // Set the playerSleepingPercentage gamerule
-        world.getGameRules().get(GameRules.PLAYERS_SLEEPING_PERCENTAGE).set(percentage, world.getServer());
+        world.getGameRules().setValue(GameRules.PLAYERS_SLEEPING_PERCENTAGE, percentage, world.getServer());
     }
 
     /**
