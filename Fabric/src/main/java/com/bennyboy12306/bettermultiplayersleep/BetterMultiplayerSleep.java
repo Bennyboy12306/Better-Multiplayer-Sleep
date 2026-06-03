@@ -7,13 +7,13 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.world.rule.GameRules;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.gamerules.GameRules;
 
 import java.nio.file.Path;
 import java.nio.file.Files;
@@ -52,28 +52,28 @@ public class BetterMultiplayerSleep implements ModInitializer {
     /**
      * This method registers the no-sleep command.
      * @param dispatcher the command dispatcher.
-     * @param commandRegistryAccess the command registry access.
+     * @param commandBuildContext the command build context.
      * @param registrationEnvironment the registration environment.
      */
-    private void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandRegistryAccess, CommandManager.RegistrationEnvironment registrationEnvironment) {
-        dispatcher.register(CommandManager.literal("no-sleep")
+    private void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection registrationEnvironment) {
+        dispatcher.register(Commands.literal("no-sleep")
                 .executes(context -> {
-                    ServerCommandSource source = context.getSource();
-                    ServerWorld world = source.getServer().getOverworld();
+                    CommandSourceStack source = context.getSource();
+                    ServerLevel world = source.getServer().overworld();
 
                     if (!noSleep) {
                         // Prevent Skipping this night by disabling multiplayer sleep
                         noSleep = true;
                         controlPlayerName = Objects.requireNonNull(context.getSource().getPlayer()).getName().getString();
                         setPlayerSleepingPercentage(world, 100);
-                        source.getServer().getPlayerManager().broadcast(Text.literal(color + "No-Sleep Requested: All players must sleep to skip to day"), false);
-                        source.sendFeedback(() -> Text.literal("Use the command again to reset to default sleep percent"), false);
+                        source.getServer().getPlayerList().broadcastSystemMessage(Component.literal(color + "No-Sleep Requested: All players must sleep to skip to day"), false);
+                        source.sendSuccess(() -> Component.literal("Use the command again to reset to default sleep percent"), false);
                     } else {
                         // Reset sleep functionality
                         if (Objects.requireNonNull(context.getSource().getPlayer()).getName().getString().equals(controlPlayerName)) { // Only the person who requested this can disable it
                             resetSleepSettings(world, source);
                         } else {
-                            source.sendFeedback(() -> Text.literal("No-Sleep already requested, only the person who requested this can disable it"), false);
+                            source.sendSuccess(() -> Component.literal("No-Sleep already requested, only the person who requested this can disable it"), false);
                         }
                     }
                     return 1;
@@ -85,15 +85,15 @@ public class BetterMultiplayerSleep implements ModInitializer {
      * @param server The Minecraft server instance.
      */
     private void onServerTick(MinecraftServer server) {
-        ServerWorld overworld = server.getOverworld();
+        ServerLevel overworld = server.overworld();
         if (overworld == null) return;
 
-        long currentDay = overworld.getTimeOfDay() / 24000;
+        long currentDay = overworld.getOverworldClockTime() / 24000;
 
         if (currentDay != lastDay) {
             lastDay = currentDay;
             if (noSleep) {
-                resetSleepSettings(overworld, server.getCommandSource());
+                resetSleepSettings(overworld, server.createCommandSourceStack());
             }
         }
     }
@@ -102,14 +102,14 @@ public class BetterMultiplayerSleep implements ModInitializer {
      * This method resets the sleep percent and variables.
      * @param world The world to reset the settings in.
      */
-    private void resetSleepSettings(ServerWorld world , ServerCommandSource source) {
+    private void resetSleepSettings(ServerLevel world, CommandSourceStack source) {
         // Reset the playerSleepingPercentage to default
         setPlayerSleepingPercentage(world, defaultSleepPercent);
 
         // Reset the no sleep flag and control player name
         noSleep = false;
         controlPlayerName = null;
-        source.getServer().getPlayerManager().broadcast(Text.literal("§6No-Sleep Reset: Players sleeping percent is now: " + defaultSleepPercent + "%"), false);
+        source.getServer().getPlayerList().broadcastSystemMessage(Component.literal("§6No-Sleep Reset: Players sleeping percent is now: " + defaultSleepPercent + "%"), false);
     }
 
     /**
@@ -117,11 +117,11 @@ public class BetterMultiplayerSleep implements ModInitializer {
      * @param world the world to set the gamerule in.
      * @param percentage the new value for the playerSleepingPercentage.
      */
-    public void setPlayerSleepingPercentage(ServerWorld world, int percentage) {
+    public void setPlayerSleepingPercentage(ServerLevel world, int percentage) {
         percentage = Math.max(0, Math.min(100, percentage));
 
         // Set the playerSleepingPercentage gamerule
-        world.getGameRules().setValue(GameRules.PLAYERS_SLEEPING_PERCENTAGE, percentage, world.getServer());
+        world.getGameRules().set(GameRules.PLAYERS_SLEEPING_PERCENTAGE, percentage, world.getServer());
     }
 
     /**

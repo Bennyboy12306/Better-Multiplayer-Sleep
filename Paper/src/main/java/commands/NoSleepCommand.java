@@ -47,7 +47,7 @@ public class NoSleepCommand implements CommandExecutor
                 plugin.setControlPlayerName(sender.getName());
 
                 CommandSender cmdSender = Bukkit.getConsoleSender();
-                String cmd = "gamerule playersSleepingPercentage 100";
+                String cmd = "gamerule players_sleeping_percentage 100";
                 Bukkit.dispatchCommand(cmdSender, cmd);
 
                 Bukkit.broadcast(Component.text(color + "No-Sleep Requested: All players must sleep to skip to day"));
@@ -60,7 +60,7 @@ public class NoSleepCommand implements CommandExecutor
                 {
                     String sleepPercent = config.getString("default-sleep-percent");
                     CommandSender cmdSender = Bukkit.getConsoleSender();
-                    String cmd = "gamerule playersSleepingPercentage " + sleepPercent;
+                    String cmd = "gamerule players_sleeping_percentage " + sleepPercent;
                     Bukkit.dispatchCommand(cmdSender, cmd);
 
                     Bukkit.broadcast(Component.text(color + "No-Sleep Reset: Players sleeping percent is now: " + sleepPercent + "%"));

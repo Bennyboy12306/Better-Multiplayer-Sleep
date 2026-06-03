@@ -49,7 +49,7 @@ public class NewDayTask extends BukkitRunnable
             FileConfiguration config = plugin.getConfig();
             String sleepPercent = config.getString("default-sleep-percent");
             CommandSender cmdSender = Bukkit.getConsoleSender();
-            String cmd = "gamerule playersSleepingPercentage " + sleepPercent;
+            String cmd = "gamerule players_sleeping_percentage " + sleepPercent;
             Bukkit.dispatchCommand(cmdSender, cmd);
 
             // Load in color from config file

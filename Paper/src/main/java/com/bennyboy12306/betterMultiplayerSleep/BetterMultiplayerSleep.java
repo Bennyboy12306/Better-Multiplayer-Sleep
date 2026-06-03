@@ -55,7 +55,7 @@ public final class BetterMultiplayerSleep extends JavaPlugin
         //Reset playerSleepingPercentage
         String sleepPercent = getConfig().getString("default-sleep-percent");
         CommandSender cmdSender = Bukkit.getConsoleSender();
-        String cmd = "gamerule playersSleepingPercentage " + sleepPercent;
+        String cmd = "gamerule players_sleeping_percentage " + sleepPercent;
         Bukkit.dispatchCommand(cmdSender, cmd);
 
         //Log plugin shut down
